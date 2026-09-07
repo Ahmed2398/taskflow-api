@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { BoardsService } from './boards.service.js';
 import { CreateBoardDto } from './dto/create-board.dto.js';
+import { QueryBoardsDto } from './dto/query-boards.dto.js';
 import { AuthGuard } from '@nestjs/passport';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 
@@ -19,7 +20,11 @@ export class BoardsController {
   }
 
   @Get()
-  findAll(@Param('projectId') projectId: string, @CurrentUser() user: any) {
-    return this.boardsService.findByProject(projectId, user.userId);
+  findAll(
+    @Param('projectId') projectId: string,
+    @CurrentUser() user: any,
+    @Query() query: QueryBoardsDto,
+  ) {
+    return this.boardsService.findByProjectWithSearch(projectId, user.userId, query);
   }
 }

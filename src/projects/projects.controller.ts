@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ProjectsService } from './projects.service.js';
 import { CreateProjectDto } from './dto/create-project.dto.js';
+import { QueryProjectsDto } from './dto/query-projects.dto.js';
 import { AuthGuard } from '@nestjs/passport';
 import { TeamMemberGuard } from '../auth/guards/team-member.guard.js';
 
@@ -15,7 +16,7 @@ export class ProjectsController {
   }
 
   @Get()
-  findAll(@Param('teamId') teamId: string) {
-    return this.projectsService.findByTeam(teamId);
+  findAll(@Param('teamId') teamId: string, @Query() query: QueryProjectsDto) {
+    return this.projectsService.findByTeamWithSearch(teamId, query);
   }
 }

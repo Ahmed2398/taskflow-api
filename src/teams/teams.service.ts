@@ -2,7 +2,10 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateTeamDto } from './dto/create-team.dto.js';
 import { AddMemberDto } from './dto/add-member.dto.js';
+import { QueryTeamsDto } from './dto/query-teams.dto.js';
 import { TeamRole } from '@prisma/client';
+import { QueryBuilder } from '../common/utils/query-builder.util.js';
+import { PaginatedResponse } from '../common/interfaces/paginated-response.interface.js';
 
 @Injectable()
 export class TeamsService {
@@ -25,6 +28,46 @@ export class TeamsService {
       where: { members: { some: { userId } } },
       include: { members: true },
     });
+  }
+
+  async findUserTeamsWithSearch(
+    userId: string,
+    query: QueryTeamsDto,
+  ): Promise<PaginatedResponse<any>> {
+    const { search, page = 1, limit = 10, sortBy, sortOrder, name, createdAfter, createdBefore } = query;
+
+    // Build where conditions
+    const searchConditions = QueryBuilder.buildSearchConditions(search, ['name']);
+    const filterConditions = QueryBuilder.buildFilterConditions({
+      name,
+      createdAfter,
+      createdBefore,
+    });
+
+    const where = {
+      members: { some: { userId } },
+      ...searchConditions,
+      ...filterConditions,
+    };
+
+    // Get total count
+    const total = await this.prisma.team.count({ where });
+
+    // Get paginated data
+    const pagination = QueryBuilder.buildPaginationOptions(page, limit);
+    const orderBy = QueryBuilder.buildSortOptions(sortBy, sortOrder);
+
+    const teams = await this.prisma.team.findMany({
+      where,
+      ...pagination,
+      orderBy,
+      include: { 
+        members: true,
+        _count: { select: { projects: true } },
+      },
+    });
+
+    return QueryBuilder.buildPaginatedResponse(teams, total, page, limit);
   }
 
   async getMembers(teamId: string) {

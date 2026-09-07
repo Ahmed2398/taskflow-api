@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { TeamsService } from './teams.service.js';
 import { CreateTeamDto } from './dto/create-team.dto.js';
 import { AddMemberDto } from './dto/add-member.dto.js';
+import { QueryTeamsDto } from './dto/query-teams.dto.js';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
@@ -19,8 +20,8 @@ export class TeamsController {
   }
 
   @Get('mine')
-  findMine(@CurrentUser() user: any) {
-    return this.teamsService.findUserTeams(user.userId);
+  findMine(@CurrentUser() user: any, @Query() query: QueryTeamsDto) {
+    return this.teamsService.findUserTeamsWithSearch(user.userId, query);
   }
 
   @Get(':teamId/members')

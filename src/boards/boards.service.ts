@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateBoardDto } from './dto/create-board.dto.js';
+import { QueryBoardsDto } from './dto/query-boards.dto.js';
+import { QueryBuilder } from '../common/utils/query-builder.util.js';
+import { PaginatedResponse } from '../common/interfaces/paginated-response.interface.js';
 
 @Injectable()
 export class BoardsService {
@@ -34,5 +37,48 @@ export class BoardsService {
       where: { projectId },
       include: { tasks: true },
     });
+  }
+
+  async findByProjectWithSearch(
+    projectId: string,
+    userId: string,
+    query: QueryBoardsDto,
+  ): Promise<PaginatedResponse<any>> {
+    await this.assertMembership(projectId, userId);
+
+    const { search, page = 1, limit = 10, sortBy, sortOrder, name, createdAfter, createdBefore } = query;
+
+    // Build where conditions
+    const searchConditions = QueryBuilder.buildSearchConditions(search, ['name']);
+    const filterConditions = QueryBuilder.buildFilterConditions({
+      name,
+      createdAfter,
+      createdBefore,
+    });
+
+    const where = {
+      projectId,
+      ...searchConditions,
+      ...filterConditions,
+    };
+
+    // Get total count
+    const total = await this.prisma.board.count({ where });
+
+    // Get paginated data
+    const pagination = QueryBuilder.buildPaginationOptions(page, limit);
+    const orderBy = QueryBuilder.buildSortOptions(sortBy, sortOrder);
+
+    const boards = await this.prisma.board.findMany({
+      where,
+      ...pagination,
+      orderBy,
+      include: { 
+        tasks: true,
+        _count: { select: { tasks: true } },
+      },
+    });
+
+    return QueryBuilder.buildPaginatedResponse(boards, total, page, limit);
   }
 }
