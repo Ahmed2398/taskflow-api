@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module.js';
 import { TeamsModule } from './teams/teams.module.js';
 import { ProjectsModule } from './projects/projects.module.js';
 import { BoardsModule } from './boards/boards.module.js';
+import { TasksModule } from './tasks/tasks.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -28,6 +29,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     TeamsModule,
     ProjectsModule,
     BoardsModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
