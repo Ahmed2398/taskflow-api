@@ -10,6 +10,8 @@ import { TeamsModule } from './teams/teams.module.js';
 import { ProjectsModule } from './projects/projects.module.js';
 import { BoardsModule } from './boards/boards.module.js';
 import { TasksModule } from './tasks/tasks.module.js';
+import { CommentsModule } from './comments/comments.module.js';
+import { AttachmentsModule } from './attachments/attachments.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -30,6 +32,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     ProjectsModule,
     BoardsModule,
     TasksModule,
+    CommentsModule,
+    AttachmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
