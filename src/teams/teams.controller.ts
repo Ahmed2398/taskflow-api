@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { TeamsService } from './teams.service.js';
 import { CreateTeamDto } from './dto/create-team.dto.js';
 import { AddMemberDto } from './dto/add-member.dto.js';
@@ -9,6 +10,8 @@ import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import { TeamRole } from '@prisma/client';
 
+@ApiTags('teams')
+@ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('teams')
 export class TeamsController {

@@ -37,6 +37,19 @@ Content-Type: application/json
 Response: { "accessToken": "...", "refreshToken": "..." }
 ```
 
+### Refresh Token
+
+```bash
+POST /auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "<refreshToken>"
+}
+
+Response: { "accessToken": "...", "refreshToken": "..." }
+```
+
 ### Get Current User
 
 ```bash
@@ -44,6 +57,41 @@ GET /auth/me
 Authorization: Bearer <accessToken>
 
 Response: { "userId": "...", "email": "..." }
+```
+
+## Swagger UI
+
+Interactive API documentation is available at:
+
+```
+http://localhost:3000/api
+```
+
+Features:
+
+- Full interactive endpoint testing
+- Click "Authorize" and paste your JWT to test protected routes
+- All DTOs documented with examples
+- Endpoints grouped by tag (auth, teams, projects, boards, tasks, comments, attachments)
+
+## Security
+
+- **Helmet**: Security headers (X-Content-Type-Options, Strict-Transport-Security, etc.)
+- **Rate Limiting**: 100 requests per minute per IP (returns 429 when exceeded)
+- **JWT Auth**: Bearer token required for all protected endpoints
+- **Env Validation**: App refuses to start if DATABASE_URL or JWT_SECRET is missing/invalid
+
+## Error Format
+
+All errors return a consistent JSON shape:
+
+```json
+{
+  "statusCode": 404,
+  "path": "/tasks/123",
+  "timestamp": "2025-01-01T00:00:00.000Z",
+  "message": "Task not found"
+}
 ```
 
 ## Teams

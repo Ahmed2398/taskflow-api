@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { TasksService } from './tasks.service.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskDto } from './dto/update-task.dto.js';
@@ -6,6 +7,8 @@ import { QueryTasksDto } from './dto/query-tasks.dto.js';
 import { AuthGuard } from '@nestjs/passport';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 
+@ApiTags('tasks')
+@ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller()
 export class TasksController {

@@ -1,9 +1,12 @@
 import { Controller, Get, Post, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CommentsService } from './comments.service.js';
 import { CreateCommentDto } from './dto/create-comment.dto.js';
 import { AuthGuard } from '@nestjs/passport';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 
+@ApiTags('comments')
+@ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller()
 export class CommentsController {

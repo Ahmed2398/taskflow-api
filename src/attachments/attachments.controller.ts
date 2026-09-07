@@ -3,6 +3,7 @@ import {
   UseInterceptors, UploadedFile, ParseFilePipe,
   MaxFileSizeValidator, BadRequestException,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -12,12 +13,26 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 
 const ALLOWED_EXTENSIONS = ['.png', '.jpeg', '.jpg', '.pdf', '.docx'];
 
+@ApiTags('attachments')
+@ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('tasks/:taskId/attachments')
 export class AttachmentsController {
   constructor(private attachmentsService: AttachmentsService) {}
 
   @Post()
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({

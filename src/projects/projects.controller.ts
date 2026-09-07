@@ -1,10 +1,13 @@
 import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ProjectsService } from './projects.service.js';
 import { CreateProjectDto } from './dto/create-project.dto.js';
 import { QueryProjectsDto } from './dto/query-projects.dto.js';
 import { AuthGuard } from '@nestjs/passport';
 import { TeamMemberGuard } from '../auth/guards/team-member.guard.js';
 
+@ApiTags('projects')
+@ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'), TeamMemberGuard)
 @Controller('teams/:teamId/projects')
 export class ProjectsController {
