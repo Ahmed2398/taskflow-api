@@ -122,7 +122,7 @@ export class TasksService {
       await this.assertAssigneeValid(teamId, dto.assigneeId);
     }
 
-    return this.prisma.task.update({
+    const updated = await this.prisma.task.update({
       where: { id: taskId },
       data: {
         title: dto.title,
@@ -132,6 +132,9 @@ export class TasksService {
         assigneeId: dto.assigneeId,
       },
     });
+
+    this.eventEmitter.emit('task.updated', { boardId: task.boardId, task: updated });
+    return updated;
   }
 
   async remove(taskId: string, userId: string) {

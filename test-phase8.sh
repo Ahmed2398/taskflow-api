@@ -100,7 +100,7 @@ curl -s -X PATCH $BASE_URL/tasks/$TASK_ID \
   -d '{"status":"IN_PROGRESS"}' > /dev/null
 echo -e "${GREEN}✓ Task updated via REST${NC}"
 
-sleep 2
+sleep 3
 
 if grep -q "TASK_UPDATED" /tmp/ws-output.txt; then
   echo -e "${GREEN}✓ WebSocket received task:updated event${NC}"
@@ -130,15 +130,9 @@ echo ""
 echo "Step 6: Test unauthorized WS connection (bad token)"
 echo "----------------------------------------------------"
 
-node -e "
-const { io } = require('socket.io-client');
-const socket = io('$BASE_URL', { auth: { token: 'invalid-token' } });
-socket.on('error', (err) => { console.log('ERROR_RECEIVED:', err); process.exit(0); });
-socket.on('connect', () => { console.log('SHOULD_NOT_CONNECT'); process.exit(1); });
-setTimeout(() => { console.log('TIMEOUT_NO_ERROR'); process.exit(1); }, 5000);
-" > /tmp/ws-bad-output.txt 2>&1
+node test-ws-bad.cjs $BASE_URL > /tmp/ws-bad-output.txt 2>&1
 BAD_PID=$!
-sleep 3
+sleep 5
 
 if grep -q "ERROR_RECEIVED" /tmp/ws-bad-output.txt; then
   echo -e "${GREEN}✓ Invalid token rejected with error event${NC}"

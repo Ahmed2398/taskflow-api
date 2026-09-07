@@ -453,6 +453,81 @@ GET /uploads/<filename>
 
 Files are served statically at `http://localhost:3000/uploads/<filename>`
 
+## WebSocket Events (Real-time)
+
+The API supports real-time updates via Socket.io. Connect with JWT authentication and join board rooms to receive live task updates.
+
+### Connection
+
+```javascript
+const socket = io('http://localhost:3000', {
+  auth: { token: '<accessToken>' },
+});
+```
+
+The token is verified on connection. Invalid tokens receive an `error` event and are disconnected.
+
+### Client → Server Events
+
+#### `board:join`
+
+Join a board's room to receive real-time updates. Team membership is verified.
+
+```javascript
+socket.emit('board:join', { boardId: '<boardId>' });
+```
+
+Response: `board:joined` event with `{ boardId }`
+
+#### `board:leave`
+
+Leave a board's room.
+
+```javascript
+socket.emit('board:leave', { boardId: '<boardId>' });
+```
+
+### Server → Client Events
+
+#### `task:created`
+
+Emitted when a task is created on the board.
+
+```json
+{ "id": "...", "title": "...", "status": "TODO", "boardId": "..." }
+```
+
+#### `task:updated`
+
+Emitted when a task is updated on the board.
+
+```json
+{ "id": "...", "title": "...", "status": "IN_PROGRESS", "boardId": "..." }
+```
+
+#### `task:deleted`
+
+Emitted when a task is deleted from the board.
+
+```json
+{ "taskId": "..." }
+```
+
+#### `error`
+
+Emitted on authentication failure or membership denial.
+
+```json
+"Unauthorized" | "Board not found" | "Not a member of this board's team"
+```
+
+### Architecture
+
+- `TasksService` emits events via `EventEmitter2` (decoupled from the gateway)
+- `BoardsGateway` listens for events and broadcasts to `board:<boardId>` rooms
+- Clients must explicitly join a board room to receive updates
+- JWT is verified on socket connection, team membership on room join
+
 ## Error Responses
 
 ### 400 Bad Request
