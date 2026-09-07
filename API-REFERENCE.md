@@ -227,6 +227,130 @@ Response: [
 ]
 ```
 
+## Tasks
+
+### Task Statuses
+
+- `TODO`
+- `IN_PROGRESS`
+- `IN_REVIEW`
+- `DONE`
+
+### Create Task
+
+```bash
+POST /boards/:boardId/tasks
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+Requires: Membership in board's team (any role)
+Validation: Assignee must be a team member
+
+{
+  "title": "Design homepage",
+  "description": "Create mockups",
+  "status": "TODO",
+  "dueDate": "2026-12-31",
+  "assigneeId": "user-id-here"
+}
+
+Response: {
+  "id": "...",
+  "title": "Design homepage",
+  "description": "Create mockups",
+  "status": "TODO",
+  "dueDate": "...",
+  "createdAt": "...",
+  "updatedAt": "...",
+  "boardId": "...",
+  "assigneeId": "..."
+}
+```
+
+### Get Board Tasks (with Search, Filters & Pagination)
+
+```bash
+GET /boards/:boardId/tasks?search=design&status=IN_PROGRESS&assigneeId=...&page=1&limit=10&sortBy=createdAt&sortOrder=desc
+Authorization: Bearer <accessToken>
+Requires: Membership in board's team (any role)
+
+Query Parameters:
+- search: Full-text search on title and description
+- status: Filter by TaskStatus (TODO, IN_PROGRESS, IN_REVIEW, DONE)
+- assigneeId: Filter by assignee user ID
+- dueBefore: Filter tasks due before date (ISO string)
+- dueAfter: Filter tasks due after date (ISO string)
+- page: Page number (default: 1)
+- limit: Items per page (default: 10, max: 100)
+- sortBy: Field to sort by (default: createdAt)
+- sortOrder: Sort direction: asc/desc (default: desc)
+
+Response: {
+  "data": [...],
+  "meta": {
+    "total": 45,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 5,
+    "hasNextPage": true,
+    "hasPreviousPage": false
+  }
+}
+```
+
+### Get Single Task
+
+```bash
+GET /tasks/:taskId
+Authorization: Bearer <accessToken>
+Requires: Membership in task's team (any role)
+
+Response: {
+  "id": "...",
+  "title": "Design homepage",
+  "description": "...",
+  "status": "IN_PROGRESS",
+  "board": { "id": "...", "project": { "teamId": "..." } },
+  "assignee": { "id": "...", "name": "...", "email": "..." },
+  "comments": [...]
+}
+```
+
+### Update Task
+
+```bash
+PATCH /tasks/:taskId
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+Requires: Membership in task's team (any role)
+Validation: Assignee must be a team member
+
+{
+  "status": "IN_PROGRESS",
+  "assigneeId": "user-id-here"
+}
+
+Response: {
+  "id": "...",
+  "title": "Design homepage",
+  "status": "IN_PROGRESS",
+  "assigneeId": "..."
+}
+```
+
+### Delete Task
+
+```bash
+DELETE /tasks/:taskId
+Authorization: Bearer <accessToken>
+Requires: Membership in task's team (any role)
+
+Response: {
+  "id": "...",
+  "title": "Design homepage",
+  "status": "..."
+}
+```
+
 ## Error Responses
 
 ### 400 Bad Request
