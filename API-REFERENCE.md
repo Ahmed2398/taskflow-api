@@ -1,6 +1,7 @@
 # TaskFlow API Reference
 
 ## Base URL
+
 ```
 http://localhost:3000
 ```
@@ -8,6 +9,7 @@ http://localhost:3000
 ## Authentication
 
 ### Register
+
 ```bash
 POST /auth/register
 Content-Type: application/json
@@ -22,6 +24,7 @@ Response: { "accessToken": "...", "refreshToken": "..." }
 ```
 
 ### Login
+
 ```bash
 POST /auth/login
 Content-Type: application/json
@@ -35,6 +38,7 @@ Response: { "accessToken": "...", "refreshToken": "..." }
 ```
 
 ### Get Current User
+
 ```bash
 GET /auth/me
 Authorization: Bearer <accessToken>
@@ -45,6 +49,7 @@ Response: { "userId": "...", "email": "..." }
 ## Teams
 
 ### Create Team
+
 ```bash
 POST /teams
 Authorization: Bearer <accessToken>
@@ -63,6 +68,7 @@ Response: {
 ```
 
 ### Get My Teams
+
 ```bash
 GET /teams/mine
 Authorization: Bearer <accessToken>
@@ -78,6 +84,7 @@ Response: [
 ```
 
 ### Get Team Members
+
 ```bash
 GET /teams/:teamId/members
 Authorization: Bearer <accessToken>
@@ -97,6 +104,7 @@ Response: [
 ```
 
 ### Add Team Member
+
 ```bash
 POST /teams/:teamId/members
 Authorization: Bearer <accessToken>
@@ -118,6 +126,7 @@ Response: {
 ```
 
 ### Remove Team Member
+
 ```bash
 DELETE /teams/:teamId/members/:memberUserId
 Authorization: Bearer <accessToken>
@@ -138,9 +147,90 @@ Response: {
 - **ADMIN** - Can add/remove members
 - **MEMBER** - Basic access, cannot manage members
 
+## Projects
+
+### Create Project
+
+```bash
+POST /teams/:teamId/projects
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+Requires: Team membership (any role)
+
+{
+  "name": "Website Redesign"
+}
+
+Response: {
+  "id": "...",
+  "name": "Website Redesign",
+  "createdAt": "...",
+  "teamId": "..."
+}
+```
+
+### Get Team Projects
+
+```bash
+GET /teams/:teamId/projects
+Authorization: Bearer <accessToken>
+Requires: Team membership (any role)
+
+Response: [
+  {
+    "id": "...",
+    "name": "Website Redesign",
+    "createdAt": "...",
+    "teamId": "...",
+    "boards": [...]
+  }
+]
+```
+
+## Boards
+
+### Create Board
+
+```bash
+POST /projects/:projectId/boards
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+Requires: Membership in project's team (any role)
+
+{
+  "name": "Sprint 1"
+}
+
+Response: {
+  "id": "...",
+  "name": "Sprint 1",
+  "createdAt": "...",
+  "projectId": "..."
+}
+```
+
+### Get Project Boards
+
+```bash
+GET /projects/:projectId/boards
+Authorization: Bearer <accessToken>
+Requires: Membership in project's team (any role)
+
+Response: [
+  {
+    "id": "...",
+    "name": "Sprint 1",
+    "createdAt": "...",
+    "projectId": "...",
+    "tasks": [...]
+  }
+]
+```
+
 ## Error Responses
 
 ### 400 Bad Request
+
 ```json
 {
   "statusCode": 400,
@@ -150,6 +240,7 @@ Response: {
 ```
 
 ### 401 Unauthorized
+
 ```json
 {
   "statusCode": 401,
@@ -158,6 +249,7 @@ Response: {
 ```
 
 ### 403 Forbidden
+
 ```json
 {
   "statusCode": 403,
@@ -167,6 +259,7 @@ Response: {
 ```
 
 ### 404 Not Found
+
 ```json
 {
   "statusCode": 404,
@@ -176,6 +269,7 @@ Response: {
 ```
 
 ### 409 Conflict
+
 ```json
 {
   "statusCode": 409,
@@ -211,11 +305,24 @@ curl -X POST http://localhost:3000/teams/$TEAM_ID/members \
   -H "Authorization: Bearer $TOKEN1" \
   -d '{"email":"bob@test.com"}'
 
-# 4. List team members
-curl -X GET http://localhost:3000/teams/$TEAM_ID/members \
+# 4. Alice creates a project
+curl -X POST http://localhost:3000/teams/$TEAM_ID/projects \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN1" \
+  -d '{"name":"Website Redesign"}'
+# Save project id as PROJECT_ID
+
+# 5. Bob creates a board (as team member)
+curl -X POST http://localhost:3000/projects/$PROJECT_ID/boards \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN2" \
+  -d '{"name":"Sprint 1"}'
+
+# 6. List project boards
+curl -X GET http://localhost:3000/projects/$PROJECT_ID/boards \
   -H "Authorization: Bearer $TOKEN1"
 
-# 5. Bob tries to add someone (should fail with 403)
+# 7. Bob tries to add a team member (should fail with 403 - needs OWNER/ADMIN)
 curl -X POST http://localhost:3000/teams/$TEAM_ID/members \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN2" \

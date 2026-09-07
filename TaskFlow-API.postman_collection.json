@@ -321,6 +321,190 @@
 				}
 			],
 			"description": "Team management endpoints"
+		},
+		{
+			"name": "Projects",
+			"item": [
+				{
+					"name": "Create Project",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.id) {",
+									"        pm.environment.set('projectId', response.id);",
+									"        console.log('Project ID saved:', response.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{projectName}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/teams/{{teamId}}/projects",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"teams",
+								"{{teamId}}",
+								"projects"
+							]
+						},
+						"description": "Create a new project under a team. Requires team membership (any role)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Team Projects",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/teams/{{teamId}}/projects",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"teams",
+								"{{teamId}}",
+								"projects"
+							]
+						},
+						"description": "List all projects for a team with boards included. Requires team membership."
+					},
+					"response": []
+				}
+			],
+			"description": "Project management endpoints nested under teams"
+		},
+		{
+			"name": "Boards",
+			"item": [
+				{
+					"name": "Create Board",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.id) {",
+									"        pm.environment.set('boardId', response.id);",
+									"        console.log('Board ID saved:', response.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{boardName}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/projects/{{projectId}}/boards",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"boards"
+							]
+						},
+						"description": "Create a new board under a project. Requires membership in project's team."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Project Boards",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/projects/{{projectId}}/boards",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"boards"
+							]
+						},
+						"description": "List all boards for a project with tasks included. Requires membership in project's team."
+					},
+					"response": []
+				}
+			],
+			"description": "Board management endpoints nested under projects"
 		}
 	],
 	"variable": [
