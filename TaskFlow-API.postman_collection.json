@@ -702,6 +702,191 @@
 				}
 			],
 			"description": "Task management endpoints - nested under boards for create/list, flat by task ID for get/update/delete"
+		},
+		{
+			"name": "Comments",
+			"item": [
+				{
+					"name": "Create Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.id) {",
+									"        pm.environment.set('commentId', response.id);",
+									"        console.log('Comment ID saved:', response.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Looks good, ship it\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/tasks/{{taskId}}/comments",
+							"host": ["{{baseUrl}}"],
+							"path": ["tasks", "{{taskId}}", "comments"]
+						},
+						"description": "Create a comment on a task. Requires membership in task's team."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task Comments",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/tasks/{{taskId}}/comments",
+							"host": ["{{baseUrl}}"],
+							"path": ["tasks", "{{taskId}}", "comments"]
+						},
+						"description": "List comments for a task. Requires membership in task's team."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Comment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/comments/{{commentId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["comments", "{{commentId}}"]
+						},
+						"description": "Delete a comment. Only the comment author can delete (ownership check)."
+					},
+					"response": []
+				}
+			],
+			"description": "Comment management endpoints - nested under tasks for create/list, flat by comment ID for delete"
+		},
+		{
+			"name": "Attachments",
+			"item": [
+				{
+					"name": "Upload Attachment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.fileUrl) {",
+									"        console.log('File uploaded to:', response.fileUrl);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "File to upload (max 5MB, allowed: png, jpeg, jpg, pdf, docx)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/tasks/{{taskId}}/attachments",
+							"host": ["{{baseUrl}}"],
+							"path": ["tasks", "{{taskId}}", "attachments"]
+						},
+						"description": "Upload a file attachment to a task. Use form-data body type (not JSON). Max 5MB. Allowed: png, jpeg, jpg, pdf, docx. Requires membership in task's team."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task Attachments",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/tasks/{{taskId}}/attachments",
+							"host": ["{{baseUrl}}"],
+							"path": ["tasks", "{{taskId}}", "attachments"]
+						},
+						"description": "List file attachments for a task. Requires membership in task's team."
+					},
+					"response": []
+				}
+			],
+			"description": "File attachment endpoints - upload and list files attached to tasks"
 		}
 	],
 	"variable": [

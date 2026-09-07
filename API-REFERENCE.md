@@ -351,6 +351,108 @@ Response: {
 }
 ```
 
+## Comments
+
+### Create Comment
+
+```bash
+POST /tasks/:taskId/comments
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+Requires: Membership in task's team (any role)
+
+{
+  "content": "Looks good, ship it"
+}
+
+Response: {
+  "id": "...",
+  "content": "Looks good, ship it",
+  "createdAt": "...",
+  "taskId": "...",
+  "authorId": "...",
+  "author": { "id": "...", "name": "..." }
+}
+```
+
+### Get Task Comments
+
+```bash
+GET /tasks/:taskId/comments
+Authorization: Bearer <accessToken>
+Requires: Membership in task's team (any role)
+
+Response: [
+  {
+    "id": "...",
+    "content": "Looks good, ship it",
+    "createdAt": "...",
+    "author": { "id": "...", "name": "..." }
+  }
+]
+```
+
+### Delete Comment
+
+```bash
+DELETE /comments/:commentId
+Authorization: Bearer <accessToken>
+Requires: Comment ownership (only author can delete)
+
+Response: {
+  "id": "...",
+  "content": "..."
+}
+```
+
+## Attachments
+
+### Upload File Attachment
+
+```bash
+POST /tasks/:taskId/attachments
+Authorization: Bearer <accessToken>
+Content-Type: multipart/form-data
+Requires: Membership in task's team (any role)
+File limits: Max 5MB, allowed types: png, jpeg, jpg, pdf, docx
+
+Body (form-data):
+  file: <binary file data>
+
+Response: {
+  "id": "...",
+  "fileName": "screenshot.png",
+  "fileUrl": "/uploads/1234567890-abc.png",
+  "createdAt": "...",
+  "taskId": "..."
+}
+```
+
+### Get Task Attachments
+
+```bash
+GET /tasks/:taskId/attachments
+Authorization: Bearer <accessToken>
+Requires: Membership in task's team (any role)
+
+Response: [
+  {
+    "id": "...",
+    "fileName": "screenshot.png",
+    "fileUrl": "/uploads/1234567890-abc.png",
+    "createdAt": "..."
+  }
+]
+```
+
+### Access Uploaded Files
+
+```bash
+GET /uploads/<filename>
+```
+
+Files are served statically at `http://localhost:3000/uploads/<filename>`
+
 ## Error Responses
 
 ### 400 Bad Request
