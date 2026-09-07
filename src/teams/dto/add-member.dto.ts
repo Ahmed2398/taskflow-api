@@ -1,0 +1,11 @@
+import { IsEmail, IsEnum, IsOptional } from 'class-validator';
+import { TeamRole } from '@prisma/client';
+
+export class AddMemberDto {
+  @IsEmail()
+  email: string;
+
+  @IsOptional()
+  @IsEnum(TeamRole)
+  role?: TeamRole;
+}
