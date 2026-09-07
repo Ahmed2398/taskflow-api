@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskDto } from './dto/update-task.dto.js';
@@ -8,7 +9,10 @@ import { PaginatedResponse } from '../common/interfaces/paginated-response.inter
 
 @Injectable()
 export class TasksService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   // Reused across create/find/update/delete to enforce team access via board -> project -> team
   private async getTeamIdForBoard(boardId: string) {
@@ -40,7 +44,7 @@ export class TasksService {
     await this.assertMembership(teamId, userId);
     await this.assertAssigneeValid(teamId, dto.assigneeId);
 
-    return this.prisma.task.create({
+    const task = await this.prisma.task.create({
       data: {
         title: dto.title,
         description: dto.description,
@@ -50,6 +54,9 @@ export class TasksService {
         assigneeId: dto.assigneeId,
       },
     });
+
+    this.eventEmitter.emit('task.created', { boardId, task });
+    return task;
   }
 
   async findByBoard(boardId: string, userId: string, query: QueryTasksDto): Promise<PaginatedResponse<any>> {
@@ -128,7 +135,10 @@ export class TasksService {
   }
 
   async remove(taskId: string, userId: string) {
-    await this.findOne(taskId, userId); // membership check
-    return this.prisma.task.delete({ where: { id: taskId } });
+    const task = await this.findOne(taskId, userId); // membership check
+    await this.prisma.task.delete({ where: { id: taskId } });
+
+    this.eventEmitter.emit('task.deleted', { boardId: task.boardId, taskId });
+    return { success: true };
   }
 }
