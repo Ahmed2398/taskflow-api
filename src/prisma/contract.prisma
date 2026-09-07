@@ -1,0 +1,113 @@
+// use prisma-next
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+}
+
+model User {
+  id            String        @id @default(uuid())
+  email         String        @unique
+  password      String
+  name          String
+  createdAt     TimestamptzString @default(now())
+  updatedAt     temporal.updatedAtString()
+
+  teamMembers   TeamMember[]
+  assignedTasks Task[]        @relation("TaskAssignee")
+  comments      Comment[]
+}
+
+model Team {
+  id          String       @id @default(uuid())
+  name        String
+  createdAt   TimestamptzString @default(now())
+
+  members     TeamMember[]
+  projects    Project[]
+}
+
+model TeamMember {
+  id        String    @id @default(uuid())
+  role      TeamRole  @default(MEMBER)
+  joinedAt  TimestamptzString @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+
+  team      Team      @relation(fields: [teamId], references: [id])
+  teamId    String
+
+  @@unique([userId, teamId])
+}
+
+model Project {
+  id        String    @id @default(uuid())
+  name      String
+  createdAt TimestamptzString @default(now())
+
+  team      Team      @relation(fields: [teamId], references: [id])
+  teamId    String
+
+  boards    Board[]
+}
+
+model Board {
+  id        String    @id @default(uuid())
+  name      String
+  createdAt TimestamptzString @default(now())
+
+  project   Project   @relation(fields: [projectId], references: [id])
+  projectId String
+
+  tasks     Task[]
+}
+
+model Task {
+  id          String      @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus  @default(TODO)
+  dueDate     TimestamptzString?
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+
+  board       Board       @relation(fields: [boardId], references: [id])
+  boardId     String
+
+  assignee    User?       @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  assigneeId  String?
+
+  comments    Comment[]
+  attachments Attachment[]
+}
+
+model Comment {
+  id        String    @id @default(uuid())
+  content   String
+  createdAt TimestamptzString @default(now())
+
+  task      Task      @relation(fields: [taskId], references: [id])
+  taskId    String
+
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  String
+}
+
+model Attachment {
+  id        String    @id @default(uuid())
+  fileUrl   String
+  fileName  String
+  createdAt TimestamptzString @default(now())
+
+  task      Task      @relation(fields: [taskId], references: [id])
+  taskId    String
+}
